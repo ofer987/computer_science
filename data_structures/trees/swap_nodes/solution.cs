@@ -19,6 +19,18 @@ public interface INode
     void Swap();
 }
 
+public static class NodeExtensions
+{
+    public static string ToInOrderTraversalString(this INode root)
+    {
+        return root.
+            InOrderTraversal().
+            Select(node => node.Index).
+            Select(index => index.ToString()).
+            Aggregate((result, index) => result + " " + index);
+    }
+}
+
 public class Leaf : INode
 {
     public int Index
@@ -91,13 +103,9 @@ public class Node : INode
 
     public void Swap()
     {
-        // Console.WriteLine("to swap for ({0})", Index);
-        // Console.WriteLine("\tLeft: ({0}), Right: ({1})", Left.Index, Right.Index);
         var swap = Left;
         Left = Right;
         Right = swap;
-        // Console.WriteLine("\tLeft: ({0}), Right: ({1})", Left.Index, Right.Index);
-        // Console.WriteLine("swapped");
     }
 }
 
@@ -122,118 +130,78 @@ public class Root : Node
     }
 }
 
-public class Tree : List<INode>
+public class Tranches : List<List<INode>>
 {
-    public static Tree BuildNewTree(INode root)
+    public INode Root { get; private set; }
+
+    public Tranches(INode root)
     {
-        var tree = new Tree(10);
+        Root = root;
+        Set();
+    }
+
+    public void Swap(int height)
+    {
+        foreach (var node in this[height])
+        {
+            node.Swap();
+        }
+    }
+
+    private void Set()
+    {
         // Use a FIFO stack
         var stack = new List<INode>();
-
         // Let's start with the root node
-        stack.Add(root.Left);
-        stack.Add(root.Right);
+        stack.Add(Root);
 
-        // unwind the stack
-        var index = 1;
         while (stack.Any(node => !(node is Leaf)))
         {
-            // Stack of the nodes of the next height
+            this.Add(stack);
+
             var nextStack = new List<INode>();
             foreach (var node in stack)
             {
-                tree.Add(node);
-                // this.Add([index] = node;
-                index++;
-
                 nextStack.Add(node.Left);
                 nextStack.Add(node.Right);
             }
+
             // Iterate over the next stack in the next iteration
             stack = nextStack;
         }
-
-        return tree;
     }
+}
 
-    public int NodeCount { get; private set; }
+public class Swapper
+{
+    public INode Root { get; private set; }
 
-    public Tree(int numberOfNodes) : base(numberOfNodes)
+    public Tranches Tranches { get; private set; }
+
+    public Swapper(INode root)
     {
-        // First node is the root node
-        this.Add(new Root());
+        this.Root = root;
 
-        NodeCount = numberOfNodes;
-    }
-
-    // public void AddNode(INode node)
-    // {
-    //     Add(node);
-    //
-    //     if (node is Node)
-    //     {
-    //         LastIndex
-    //     }
-    // }
-
-    public IEnumerable<INode> InOrderTraversal()
-    {
-        return this[0].InOrderTraversal();
-    }
-
-    public string InOrderTraversalToString()
-    {
-        return
-            InOrderTraversal().
-            Select(node => node.Index).
-            Select(index => index.ToString()).
-            Aggregate((result, index) => result + " " + index);
+        Tranches = new Tranches(root);
     }
 
     public void Swap(int startHeight)
     {
         foreach (var height in HeightsToSwap(startHeight))
         {
-            // Console.WriteLine("Swap this height " + height);
-            // The roots of the subtrees that will be swapped
-            foreach (var index in IndicesToSwap(height))
-            {
-                // Console.WriteLine("Swap this index " + index);
-                // try
-                // {
-                    this[index].Swap();
-                    // Console.WriteLine("Swap this index " + index);
-                // }
-                // catch (ArgumentOutOfRangeException)
-                // {
-                //     // Ignore the error
-                // }
-
-                // Start with the root
-                // BuildNewTree(this[0]);
-            }
+            // 0-based indexing
+            Tranches.Swap(height - 1);
         }
     }
 
     private IEnumerable<int> HeightsToSwap(int height)
     {
-        // Console.WriteLine("Count is " + this.NodeCount);
         for (var multiple = 1;
-                multiple * height < this.NodeCount;
+                // 1-based indexing < 0-based indexing
+                multiple * height <= Tranches.Count;
                 multiple++)
         {
-            // Console.WriteLine("Height is {0}", multiple * height);
             yield return multiple * height;
-        }
-
-    }
-
-    private IEnumerable<int> IndicesToSwap(int height)
-    {
-        // Console.WriteLine("Count is " + this.Count);
-        for (var index = Math.Pow(2, height-1) - 1; index < this.Count && index < Math.Pow(2, height) - 1; index++)
-        {
-            yield return Convert.ToInt32(index);
         }
     }
 }
@@ -244,29 +212,27 @@ public class Solution
     {
         /* Enter your code here. Read input from STDIN. Print output to STDOUT. Your class should be named Solution */
 
-        var tree = GetNodes();
-        // Console.WriteLine(tree.InOrderTraversalToString());
-        var traversalLocations = GetTraversalLocations();
+        var root = GetTree();
+        var traversals = GetTraversalHeights();
 
-        foreach (var traversalLocation in traversalLocations)
+        var swapper = new Swapper(root);
+        foreach (var traversal in traversals)
         {
-            tree.Swap(traversalLocation);
+            swapper.Swap(traversal);
 
-            Console.WriteLine(tree.InOrderTraversalToString());
+            Console.WriteLine(root.ToInOrderTraversalString());
         }
     }
 
-    private static Tree GetNodes()
+    private static Root GetTree()
     {
-        var reverseLookup = new Dictionary<int, INode>();
         var numberOfNodes = int.Parse(Console.ReadLine());
 
-        var tree = new Tree(numberOfNodes);
-        reverseLookup.Add(1, tree[0]);
+        var root = new Root();
 
-        // Count from the left child of the root (i.e., the second node)
-        var treeIndex = 1;
-        // Console.WriteLine("numberOfNodes = " + numberOfNodes);
+        var reverseLookup = new Dictionary<int, INode>();
+        reverseLookup.Add(1, root);
+
         for (var i = 1; i <= numberOfNodes; i++)
         {
             var line = Console.ReadLine();
@@ -281,9 +247,7 @@ public class Solution
             for (var j = 0; j <= 1; j++)
             {
                 var index = indices[j];
-                // Console.WriteLine("i is " + i);
                 var parent = reverseLookup[i];
-                // Console.WriteLine("Parent is " + parent);
                 INode node;
 
                 if (index == -1)
@@ -302,29 +266,23 @@ public class Solution
                     };
                 }
 
-                // Console.WriteLine("treeIndex = " + treeIndex);
-                tree.Add(node);
-                Console.WriteLine("Added node ({0}) to parent ({1})", node.Index, parent.Index);
                 reverseLookup[index] = node;
 
                 if (j == 0)
                 {
-                    reverseLookup[i].Left = node;
+                    parent.Left = node;
                 }
                 else
                 {
-                    reverseLookup[i].Right = node;
+                    parent.Right = node;
                 }
-
-                // Move to the next node
-                treeIndex++;
             }
         }
 
-        return tree;
+        return root;
     }
 
-    private static IEnumerable<int> GetTraversalLocations()
+    private static IEnumerable<int> GetTraversalHeights()
     {
         var total = int.Parse(Console.ReadLine());
 
