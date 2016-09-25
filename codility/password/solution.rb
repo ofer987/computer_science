@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-class NilValidSubstring
+class NilSubstring
   def nil?
     true
   end
@@ -21,7 +21,7 @@ class Password
     string
       .split(/\d/)
       .sort { |a, b| b.length <=> a.length }
-      .find (-> { NilValidSubstring.new }) { |item| /[a-z]/ =~ item && /[A-Z]/ =~ item }
+      .find (-> { NilSubstring.new }) { |item| /[a-z]/ =~ item && /[A-Z]/ =~ item }
   end
 end
 

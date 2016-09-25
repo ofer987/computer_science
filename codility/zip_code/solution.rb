@@ -29,10 +29,6 @@ class ZipCode
   def longest_length
     a.length > b.length ? a.length : b.length
   end
-
-  def foo(str, index)
-    str[index]
-  end
 end
 
 def solution(a, b)
