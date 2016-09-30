@@ -24,7 +24,8 @@ class TestCases
         end
       end
     rescue => e
-      puts e
+      puts e.backtrace
+      puts e.message
     end
   end
 
@@ -62,7 +63,8 @@ class Runner
           puts "Fail: got #{actual_output}"
         end
       rescue => e
-        puts e
+        puts e.backtrace
+        puts e.message
       end
     end
   end
