@@ -16,6 +16,10 @@ class Memory
   def append(index, count)
     @values[index] = count
   end
+
+  def to_s
+    @values.join(" ")
+  end
 end
 
 class NilNode
@@ -36,7 +40,6 @@ class NilNode
   end
 
   def compute_nodes
-    puts "Compute for NilNode"
   end
 end
 
@@ -54,7 +57,6 @@ class Leaf
   end
 
   def compute_nodes
-    puts "Compute for Leaf"
   end
 
   def remaining
@@ -84,33 +86,25 @@ class Node
   end
 
   def compute_nodes
-    puts "Does memory have key for #{@remaining}?"
-    return if @memory.has_key?(@remaining)
-    puts "False"
+    if @memory.has_key?(@remaining)
+      @leaves_count = @memory[@remaining]
+
+      return
+    end
 
     # left
-    puts "Left"
     one.compute_nodes
 
     # right
-    puts "First Right"
     two.compute_nodes
 
     # right
-    puts "Second Right"
     three.compute_nodes
 
     # self
-    puts "Self"
-    puts "1) Remaining #{@remaining} has #{@leaves_count} leaves"
-    puts to_s
-
     @leaves_count = [one, two, three]
-      .map { |node| puts "Node (#{node.class.to_s}) (#{node.remaining}) is nil" if node.leaves_count.nil?; node.leaves_count.to_i }
+      .flat_map { |node| node.leaves_count.to_i }
       .reduce { |count, sum| sum += count }
-
-    puts "2) Remaining #{@remaining} has #{@leaves_count} leaves"
-    puts
 
     @memory.append(@remaining, @leaves_count)
   end
@@ -158,18 +152,16 @@ class Tree
   def initialize(steps, memory)
     @steps = steps
     @memory = memory
+
+    @root = Node.new(@steps, @memory)
   end
 
   def compute_nodes
-    root.compute_nodes
+    @root.compute_nodes
   end
 
-  def leaves
-    root.leaves_count
-  end
-
-  def root
-    Node.new(@steps, @memory)
+  def leaves_count
+    @root.leaves_count
   end
 end
 
@@ -179,7 +171,7 @@ def count(steps)
   tree = Tree.new(steps, memory)
   tree.compute_nodes
 
-  tree.leaves
+  tree.leaves_count
 end
 
 def main
@@ -187,9 +179,7 @@ def main
   for a0 in (0..s-1)
     n = gets.strip.to_i
 
-    puts "Staircase of size = #{n}"
-    count = count(n)
-    puts "Answer: #{count}"
+    puts count(n)
   end
 end
 
