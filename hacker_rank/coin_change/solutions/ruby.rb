@@ -1,42 +1,44 @@
 #!/bin/ruby
 
-class Combinations
-  def initialize(count)
-    @combinations = []
-    @count = count
-  end
+require 'set'
 
-  def append(value)
-    unless @combinations.any? { |combination| combination == value }
-      @combinations << value
-    end
-  end
-  alias_method :<<, :append
-end
+# class Combinations
+#   def initialize(count)
+#     @combinations = []
+#     @count = count
+#   end
+#
+#   def append(value)
+#     unless @combinations.any? { |combination| combination == value }
+#       @combinations << value
+#     end
+#   end
+#   alias_method :<<, :append
+# end
 
 # key:
 #   integer
 #   represents: remaining value
 # value:
 #   Combination
-class Memoization < Hash
-  def initialize
-    @combinations = Set.new
-    @remaining_values = {}
-  end
-
-  def append(remaining_value, combination, count)
-    combination = Array(combination).sort { |x, y| x <=> y }
-    @combinations << combination
-
-    @remaining_values[remaining_value] = count
-  end
-  alias_method :<<, :append
-
-  def has_key?(key)
-    @remaining_values.has_key?(key)
-  end
-end
+# class Memoization < Hash
+#   def initialize
+#     @combinations = Set.new
+#     @remaining_values = {}
+#   end
+#
+#   def append(remaining_value, combination, count)
+#     combination = Array(combination).sort { |x, y| x <=> y }
+#     @combinations << combination
+#
+#     @remaining_values[remaining_value] = count
+#   end
+#   alias_method :<<, :append
+#
+#   def has_key?(key)
+#     @remaining_values.has_key?(key)
+#   end
+# end
 
 # class Memoization < Hash
 #   def append(key, count, combination)
@@ -56,6 +58,25 @@ end
 #   end
 # end
 
+class Memoization
+  attr_accessor :combinations, :counter, :combs
+
+  def initialize
+    @combinations = Set.new
+    @counter = {}
+    @combs = {}
+  end
+
+  def has_key?(key)
+    @counter.has_key?(key)
+  end
+
+  def append(key, value, combinations)
+    @counter[key] = value
+    @combinations << combinations.sort { |x, y| x <=> y }
+  end
+end
+
 class DeadEnd
   def use_coins
   end
@@ -63,10 +84,29 @@ class DeadEnd
   def count
     0
   end
+
+  def to_s
+    ""
+  end
+
+  def used_coin
+  end
+
+  def tails
+    []
+  end
+
+  def combinations
+    []
+  end
 end
 
 class Leaf
-  def initialize
+  attr_reader :used_coin
+
+  def initialize(used_coins)
+    @used_coins = Array(used_coins)
+    @used_coin = @used_coins.last
   end
 
   def use_coins
@@ -75,43 +115,62 @@ class Leaf
   def count
     1
   end
+
+  def to_s
+    "Leaf"
+  end
+
+  def tails
+    Array(@used_coin)
+  end
+
+  def combinations
+    # There is only one combination,
+    # because the last node is a leaf
+    # sort in ascending order
+    @combinatons ||= @used_coins.sort { |x, y| x <=> y }
+  end
 end
 
 class Node
-  attr_reader :count
+  attr_reader :count, :used_coin
 
   def initialize(coins, value, used_coins, memo)
     # sort in descending order
-    @coins = Array(coins).sort { |x, y| x <=> y }
+    @coins = Array(coins).sort { |x, y| y <=> x }
     @value = value
     @used_coins = Array(used_coins)
+    @new_used_coins = []
     @memo = memo
+
+    @used_coin = @used_coins.last
 
     @count = 0
     @children = []
   end
 
   def use_coins
-    puts "Value: #{@value}"
-    if @memo.has_key?(@value, @used_coins)
-      puts "Is memoized"
-      # @count = @memo[@value]
+    if @memo.has_key?(@value)
+      @count = @memo.counter[@value]
+
+      # Add combinations to counter
+      new_combs = get_combinations(@used_coins, @memo.combs[@value])
+      @memo.combinations += new_combs
+      @tails = @memo.combs[@value]
 
       return
     end
 
-    expended_all_coins = false
     @children = @coins.map do |coin|
-      puts "Using coin: #{coin}"
+      puts "Current value = #{@value} using coin #{coin}"
       new_value = @value - coin
-      new_used_coins = @used_coins + Array(coin)
-      child = if new_value > 0
-                Node.new(@coins, new_value, new_used_coins, @memo)
+      used_coins = @used_coins + Array(coin)
+      child = if @used_coins.any? && @used_coins.last < coin
+                DeadEnd.new
+              elsif new_value > 0
+                Node.new(@coins, new_value, used_coins, @memo)
               elsif new_value == 0
-                @memo.append_combination(new_used_coins)
-                expended_all_coins = true
-                puts "yay"
-                Leaf.new
+                Leaf.new(used_coins)
               else
                 DeadEnd.new
               end
@@ -124,13 +183,46 @@ class Node
     @count = @children
       .map { |node| node.count }
       .reduce { |val, sum| sum += val }
-    if expended_all_coins = 
-    puts "Count: #{@count}"
 
-    @memo.append(@value, @count, @used_coins)
+    @memo.counter[@value] = @count
+    @memo.combinations += combinations
+    @memo.combs[@value] = tails
+
+    puts "For #{@value} with coins #{self.combinations} has #{@memo.combinations.count} times"
+    puts "And the value #{@value} has tails of #{@memo.combs[@value]}"
+  end
+
+  def to_s
+    Array(@used_coin) + @children.flat_map { |node| node.to_s }
+  end
+
+  def tails
+    @children.each { |node| puts node.used_coin }
+    @tails ||= @children
+      .map { |node| node.tails }
+      .select { |tail| tail.any? }
+      .flat_map { |tail| Array(tail) }
+  end
+
+  def combinations
+    # There are several combinations because its children are subtrees
+    # that end in leaves
+    @combinations ||= @children.map(&:combinations).select(&:any?)
   end
 
   private
+
+  def get_combinations(head, tails)
+    combinations = tails.map do |tail|
+      # puts "Head is #{head}"
+      # puts "tail is #{tail}"
+      combination = head + Array(tail)
+
+      combination.sort { |x, y| x <=> y }
+    end
+
+    Set.new(combinations)
+  end
 end
 
 n, _m = gets.strip.split(' ').map(&:to_i)
@@ -140,4 +232,4 @@ memo = Memoization.new
 counter = Node.new(coins, n, [], memo)
 counter.use_coins
 
-puts counter.count
+puts memo.combinations.count
