@@ -110,6 +110,7 @@ class Leaf
   end
 
   def use_coins
+    # @memo.combs[@used_coin] = [@used_coin]
   end
 
   def count
@@ -151,12 +152,16 @@ class Node
 
   def use_coins
     if @memo.has_key?(@value)
+      puts "Has key for value = #{@value}"
       @count = @memo.counter[@value]
 
       # Add combinations to counter
       new_combs = get_combinations(@used_coins, @memo.combs[@value])
+      new_tails = get_combinations([@used_coins.last], @memo.combs[@value])
+      puts "The new tails are #{new_tails.to_a}"
       @memo.combinations += new_combs
       @tails = @memo.combs[@value]
+      @memo.combs[@value + @used_coin] += new_tails
 
       return
     end
@@ -189,6 +194,9 @@ class Node
     @memo.combs[@value] = tails
 
     puts "For #{@value} with coins #{self.combinations} has #{@memo.combinations.count} times"
+    @children.select { |node| !node.used_coin.nil? }.each do |node|
+      puts "Has child with coin #{node.used_coin}"
+    end
     puts "And the value #{@value} has tails of #{@memo.combs[@value]}"
   end
 
@@ -197,11 +205,11 @@ class Node
   end
 
   def tails
-    @children.each { |node| puts node.used_coin }
+    # @children.each { |node| puts node.used_coin }
     @tails ||= @children
       .map { |node| node.tails }
-      .select { |tail| tail.any? }
-      .flat_map { |tail| Array(tail) }
+      .select { |tails| tails.any? }
+      .flat_map { |tails| tails }
   end
 
   def combinations
@@ -214,8 +222,8 @@ class Node
 
   def get_combinations(head, tails)
     combinations = tails.map do |tail|
-      # puts "Head is #{head}"
-      # puts "tail is #{tail}"
+      puts "Head is #{head}"
+      puts "tail is #{tail}"
       combination = head + Array(tail)
 
       combination.sort { |x, y| x <=> y }
