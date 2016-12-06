@@ -63,23 +63,11 @@ class DeadEnd
   def use_coins
   end
 
-  def count
-    0
-  end
-
-  def to_s
-    "DeadEnd"
-  end
-
   def used_coin
   end
 
   def tails
     nil
-  end
-
-  def children
-    []
   end
 
   def combinations
@@ -98,22 +86,10 @@ class Leaf
   def use_coins
   end
 
-  def count
-    1
-  end
-
-  def to_s
-    @used_coins
-  end
-
   def tails
     return @tails unless @tails.nil?
 
     @tails = Combinations.new([ [] ])
-  end
-
-  def children
-    []
   end
 
   def combinations
@@ -125,27 +101,29 @@ class Leaf
 end
 
 class Node
-  attr_reader :count, :used_coin, :tails, :children
+  attr_reader :used_coin, :tails
 
   def initialize(coins, value, used_coins, memo)
     # sort in descending order
     @coins = Array(coins).sort { |x, y| y <=> x }
     @value = value
     @used_coins = Array(used_coins)
-    @new_used_coins = []
     @memo = memo
 
     @used_coin = @used_coins.last
 
-    @count = 0
     @children = []
 
     @used = false
   end
 
   def use_coins
-    return if @used
+    if @used
+      return
+    end
     @used = true
+
+    puts "calculating for #{@used_coin}"
 
     @children = @coins.map do |coin|
       new_value = @value - coin
@@ -167,32 +145,16 @@ class Node
       child
     end
 
-    # @memo.combinations += combinations
-    # @children.each do |node|
-    #   node.new_tails
-    # end
-
     tails
 
-    # set_tails(@children)
     @memo.tails[@value] = self
     combinations.each do |combination|
       @memo.combinations << combination
     end
   end
 
-  def to_s
-    @used_coins
-  end
-
-  # def new_tails
-  #   @tails.map do |tail|
-  #     tail.add_in_order(@used_coin)
-  #   end
-  # end
-
   def combinations
-    tails.values.to_a.map { |tail| (tail + @used_coins).sort { |x, y| x <=> y } }
+    @combinations ||= tails.values.to_a.map { |tail| (tail + @used_coins).sort { |x, y| x <=> y } }
   end
 
   def tails
@@ -201,25 +163,9 @@ class Node
     _tails = @children
       .select { |node, coin| !node.tails.nil? }
       .map { |node, coin| node.tails.add_coin(coin) }
-    Combinations.concat(_tails)
+
+    @tails = Combinations.concat(_tails)
   end
-
-  # def set_tails(children)
-  #   @tails = children
-  #     .flat_map { |node| node.tails.map { |tail| ([node.used_coin] + tail).select { |item| !item.nil? } } }
-  #     .select(&:any?)
-  #     .map { |tail| tail.sort { |x, y| x <=> y } }
-  #
-  #   @tails = Set.new(@tails)
-  # end
-
-  # def combinations
-  #   # There are several combinations because its children are subtrees
-  #   # that end in leaves
-  #   @combinations ||= @children.map(&:combinations).select(&:any?)
-  # end
-
-  private
 end
 
 n, _m = gets.strip.split(' ').map(&:to_i)
