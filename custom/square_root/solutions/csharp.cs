@@ -4,34 +4,29 @@ using System.Linq;
 
 public static class Extensions
 {
-    private const float Tolerance = 0.5;
+    private const double Tolerance = 0.5;
 
-    public static float SquareRoot(this int question)
+    public static double SquareRoot(this int question)
     {
-        var half = question / 2.0;
-
-        var square = half * half;
-
-        // Within tolerance
-        if (half == square)
+        try
         {
-            return half;
+            return SquareRootInternal(question, 0, (double)question);
         }
-        else if (half < square)
+        catch (Exception exception)
         {
-        }
-        else
-        {
+            Console.WriteLine("problem happened {0}", exception.Message);
+
+            return 0.0;
         }
     }
 
-    private static float SquareRootInternal(float question, float start, float end)
+    private static double SquareRootInternal(int question, double start, double end)
     {
-        var half = (end - start) / 2.0
+        var half = (end + start) / 2.0;
         var square = half * half;
 
         // Within tolerance
-        if (IsWithinTolerance(square, question)
+        if (IsWithinTolerance(question, square, Tolerance))
         {
             return half;
         }
@@ -44,13 +39,20 @@ public static class Extensions
             return SquareRootInternal(question, start, half);
         }
     }
+
+    private static bool IsWithinTolerance(int question, double answer, double tolerance)
+    {
+        return (answer < (question + tolerance)) && (answer > (question - tolerance));
+    }
 }
 
-public static class Solution()
+public static class Solution
 {
     public static void Main(string[] argv)
     {
         var question = GetInteger();
+        var answer = question.SquareRoot();
+        Console.WriteLine(answer);
     }
 
     // For integers
