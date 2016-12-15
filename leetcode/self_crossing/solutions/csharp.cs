@@ -21,7 +21,7 @@ public static class Extensions
     }
 }
 
-public class Coordinate
+public class Coordinate : IEquatable<Coordinate>
 {
     public int X { get; set; }
 
@@ -31,6 +31,25 @@ public class Coordinate
     {
         X = x;
         Y = y;
+    }
+
+    public bool Equals(Coordinate other)
+    {
+        return X == other.X && Y == other.Y;
+    }
+}
+
+public class CoodinateEqualityComparer : EqualityComparer<Coordinate>
+{
+    public override bool Equals(Coordinate x, Coordinate y)
+    {
+        return x.X == y.X && x.Y == y.Y;
+    }
+
+    public override int GetHashCode(Coordinate coordinate)
+    {
+        return 1;
+        // return coordinate.X.GetHashCode() + coordinate.Y.GetHashCode();
     }
 }
 
@@ -49,7 +68,7 @@ public class Grid
         Movements = new List<int>();
         Movements.AddRange(movements);
         Coordinates = GetCoordinates(Movements).ToList();
-        HasPlayed = new Dictionary<Coordinate, int>();
+        ResetHasPlayed();
     }
 
     public IEnumerable<Coordinate> GetCoordinates(IEnumerable<int> movements)
@@ -59,6 +78,7 @@ public class Grid
         foreach (var movement in movements)
         {
             var coordinate = new Coordinate(prevCoordinate.X, prevCoordinate.Y);
+            Console.WriteLine("Moving {0} for {1} movement", sense.ToString(), movement);
             switch(sense)
             {
                 case Senses.North:
@@ -76,29 +96,36 @@ public class Grid
             }
 
             yield return coordinate;
-            prevCoordinate = coordinate;
 
+            prevCoordinate = coordinate;
             sense = (Senses)(((int)sense + 1) % 4);
         }
     }
 
     public void Play()
     {
-        // Reset
-        HasPlayed = new Dictionary<Coordinate, int>();
+        ResetHasPlayed();
 
         foreach (var coordinate in Coordinates)
         {
+            Console.WriteLine("[x, y] = [{0}, {1}]", coordinate.X, coordinate.Y);
             if (HasPlayed.ContainsKey(coordinate))
             {
+                Console.WriteLine("true");
                 HasPlayed[coordinate] += 1;
             }
             else
             {
                 // Default value
-                HasPlayed[coordinate] = 0;
+                HasPlayed[coordinate] = 1;
             }
         }
+    }
+
+    private void ResetHasPlayed()
+    {
+        HasPlayed = new Dictionary<Coordinate, int>();
+        // HasPlayed = new Dictionary<Coordinate, int>(new CoodinateEqualityComparer());
     }
 
     public bool HasCrossed()
