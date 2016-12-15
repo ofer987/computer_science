@@ -42,11 +42,14 @@ public class Grid
 
     private List<Coordinate> Coordinates { get; set; }
 
+    public Dictionary<Coordinate, int> HasPlayed { get; private set; }
+
     public Grid(IEnumerable<int> movements)
     {
         Movements = new List<int>();
         Movements.AddRange(movements);
         Coordinates = GetCoordinates(Movements).ToList();
+        HasPlayed = new Dictionary<Coordinate, int>();
     }
 
     public IEnumerable<Coordinate> GetCoordinates(IEnumerable<int> movements)
@@ -78,6 +81,38 @@ public class Grid
             sense = (Senses)(((int)sense + 1) % 4);
         }
     }
+
+    public void Play()
+    {
+        // Reset
+        HasPlayed = new Dictionary<Coordinate, int>();
+
+        foreach (var coordinate in Coordinates)
+        {
+            if (HasPlayed.ContainsKey(coordinate))
+            {
+                HasPlayed[coordinate] += 1;
+            }
+            else
+            {
+                // Default value
+                HasPlayed[coordinate] = 0;
+            }
+        }
+    }
+
+    public bool HasCrossed()
+    {
+        foreach (var pair in HasPlayed)
+        {
+            if (pair.Value > 1)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 public static class Solution
@@ -87,5 +122,10 @@ public static class Solution
         var question = Console.ReadLine().Split(' ').Select(int.Parse);
 
         var answer = new Grid(question);
+        answer.Play();
+
+        var hasCrossed = answer.HasCrossed();
+
+        Console.WriteLine(hasCrossed ? "YES" : "NO");
     }
 }
