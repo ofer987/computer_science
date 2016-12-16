@@ -21,7 +21,7 @@ public static class Extensions
     }
 }
 
-public class Coordinate : IEquatable<Coordinate>
+public class Coordinate
 {
     public int X { get; set; }
 
@@ -31,12 +31,6 @@ public class Coordinate : IEquatable<Coordinate>
     {
         X = x;
         Y = y;
-    }
-
-    public bool Equals(Coordinate other)
-    {
-        // Console.WriteLine("Equality");
-        return X == other.X && Y == other.Y;
     }
 }
 
@@ -77,18 +71,13 @@ public class Grid
 
         foreach (var coordinate in Coordinates)
         {
-            // Console.WriteLine("[x, y] = [{0}, {1}]", coordinate.X, coordinate.Y);
             if (HasPlayed.ContainsKey(coordinate))
             {
-                // Console.WriteLine("true");
                 HasPlayed[coordinate] += 1;
             }
             else
             {
-                // Default value
-                // Console.WriteLine("false");
                 HasPlayed.Add(coordinate, 1);
-                // Console.WriteLine("Now HasPlayed has {0} elements", HasPlayed.Count);
             }
         }
     }
@@ -157,7 +146,6 @@ public class Grid
 
     private void ResetHasPlayed()
     {
-        // HasPlayed = new Dictionary<Coordinate, int>();
         HasPlayed = new Dictionary<Coordinate, int>(new CoodinateEqualityComparer());
     }
 
