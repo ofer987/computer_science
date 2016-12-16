@@ -35,6 +35,7 @@ public class Coordinate : IEquatable<Coordinate>
 
     public bool Equals(Coordinate other)
     {
+        // Console.WriteLine("Equality");
         return X == other.X && Y == other.Y;
     }
 }
@@ -48,8 +49,7 @@ public class CoodinateEqualityComparer : EqualityComparer<Coordinate>
 
     public override int GetHashCode(Coordinate coordinate)
     {
-        return 1;
-        // return coordinate.X.GetHashCode() + coordinate.Y.GetHashCode();
+        return coordinate.X.GetHashCode() + coordinate.Y.GetHashCode();
     }
 }
 
@@ -71,61 +71,94 @@ public class Grid
         ResetHasPlayed();
     }
 
-    public IEnumerable<Coordinate> GetCoordinates(IEnumerable<int> movements)
-    {
-        var sense = Senses.North;
-        var prevCoordinate = new Coordinate(0, 0);
-        foreach (var movement in movements)
-        {
-            var coordinate = new Coordinate(prevCoordinate.X, prevCoordinate.Y);
-            Console.WriteLine("Moving {0} for {1} movement", sense.ToString(), movement);
-            switch(sense)
-            {
-                case Senses.North:
-                    coordinate.Y += movement;
-                    break;
-                case Senses.West:
-                    coordinate.X -= movement;
-                    break;
-                case Senses.South:
-                    coordinate.Y -= movement;
-                    break;
-                case Senses.East:
-                    coordinate.X += movement;
-                    break;
-            }
-
-            yield return coordinate;
-
-            prevCoordinate = coordinate;
-            sense = (Senses)(((int)sense + 1) % 4);
-        }
-    }
-
     public void Play()
     {
         ResetHasPlayed();
 
         foreach (var coordinate in Coordinates)
         {
-            Console.WriteLine("[x, y] = [{0}, {1}]", coordinate.X, coordinate.Y);
+            // Console.WriteLine("[x, y] = [{0}, {1}]", coordinate.X, coordinate.Y);
             if (HasPlayed.ContainsKey(coordinate))
             {
-                Console.WriteLine("true");
+                // Console.WriteLine("true");
                 HasPlayed[coordinate] += 1;
             }
             else
             {
                 // Default value
-                HasPlayed[coordinate] = 1;
+                // Console.WriteLine("false");
+                HasPlayed.Add(coordinate, 1);
+                // Console.WriteLine("Now HasPlayed has {0} elements", HasPlayed.Count);
+            }
+        }
+    }
+
+    private IEnumerable<Coordinate> GetCoordinates(IEnumerable<int> movements)
+    {
+        var coordinate = new Coordinate(0, 0);
+        yield return coordinate;
+
+        var sense = Senses.North;
+        foreach (var movement in movements)
+        {
+            switch(sense)
+            {
+                case Senses.North:
+                    foreach (var unit in ReturnUnitsFrom(movement))
+                    {
+                        coordinate = new Coordinate(coordinate.X, coordinate.Y + unit);
+                        yield return coordinate;
+                    }
+                    break;
+                case Senses.West:
+                    foreach (var unit in ReturnUnitsFrom(movement))
+                    {
+                        coordinate = new Coordinate(coordinate.X - unit, coordinate.Y);
+                        yield return coordinate;
+                    }
+                    break;
+                case Senses.South:
+                    foreach (var unit in ReturnUnitsFrom(movement))
+                    {
+                        coordinate = new Coordinate(coordinate.X, coordinate.Y - unit);
+                        yield return coordinate;
+                    }
+                    break;
+                case Senses.East:
+                    foreach (var unit in ReturnUnitsFrom(movement))
+                    {
+                        coordinate = new Coordinate(coordinate.X + unit, coordinate.Y);
+                        yield return coordinate;
+                    }
+                    break;
+            }
+
+            sense = (Senses)(((int)sense + 1) % 4);
+        }
+    }
+
+    private IEnumerable<int> ReturnUnitsFrom(int distance)
+    {
+        if (distance > 0)
+        {
+            for (var i = 0; i < distance; i++)
+            {
+                yield return 1;
+            }
+        }
+        else if (distance < 0)
+        {
+            for (var i = 0; i > distance; i--)
+            {
+                yield return 1;
             }
         }
     }
 
     private void ResetHasPlayed()
     {
-        HasPlayed = new Dictionary<Coordinate, int>();
-        // HasPlayed = new Dictionary<Coordinate, int>(new CoodinateEqualityComparer());
+        // HasPlayed = new Dictionary<Coordinate, int>();
+        HasPlayed = new Dictionary<Coordinate, int>(new CoodinateEqualityComparer());
     }
 
     public bool HasCrossed()
