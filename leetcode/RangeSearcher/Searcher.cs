@@ -25,10 +25,18 @@ namespace RangeSearcher
 
             if (target < median)
             {
+                if (start > index - 1)
+                {
+                    return new Tuple<int, int>(-1, -1);
+                }
                 return FindMedian(target, start, index-1);
             }
             else if (target > median)
             {
+                if (end < index + 1)
+                {
+                    return new Tuple<int, int>(-1, -1);
+                }
                 return FindMedian(target, index+1, end);
             }
 
