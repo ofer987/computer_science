@@ -36,7 +36,7 @@ questions = lists
 answer = lists.flatten.sort.join(" ")
 
 begin
-  IO.write(input_file, "#{lists.count}\n#{questions}")
+  IO.write(input_file, questions)
   IO.write(output_file, answer)
 rescue => ex
   puts "Error!"
