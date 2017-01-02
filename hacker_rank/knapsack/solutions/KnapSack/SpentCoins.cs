@@ -7,32 +7,57 @@ using KnapSack.Extensions;
 
 namespace KnapSack
 {
-    public struct SpentCoins
+    public class SpentCoins : ICoins
     {
+        public static int Compare(ICoins first, ICoins second)
+        {
+            if (first.Sum > second.Sum)
+            {
+                return 1;
+            }
+            else if (first.Sum < second.Sum)
+            {
+                return -1;
+            }
+
+            if (first.Count < second.Count)
+            {
+                return 1;
+            }
+            else if (first.Count > second.Count)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+
         public bool IsSuccess { get; private set; }
 
         public IEnumerable<int> Coins { get; private set; }
 
-        private int? sum;
-        public int Sum
-        {
-            get
-            {
-                if (sum == null)
-                {
-                    sum = 0;
-                    sum = Coins.Aggregate((sum, coin) => sum += coin);
-                }
+        public int Sum { get; private set; }
 
-                return sum.Value;
-            }
-        }
+        public int Count { get; private set; }
 
         public SpentCoins(bool isSuccess, IEnumerable<int> coins)
         {
             IsSuccess = isSuccess;
             Coins = coins;
-            sum = null;
+            Sum = GetSum(coins);
+            Count = Coins.Count();
+        }
+
+        private int GetSum(IEnumerable<int> coins)
+        {
+            try
+            {
+                return Coins.Aggregate((sum, coin) => sum += coin);
+            }
+            catch (InvalidOperationException)
+            {
+                return 0;
+            }
         }
     }
 }

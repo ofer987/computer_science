@@ -19,12 +19,12 @@ namespace KnapSack
             Sum = sum;
         }
 
-        public SpentCoins Spend()
+        public ICoins Spend()
         {
             return Spend(Sum, Coins, new List<int>());
         }
 
-        private SpentCoins Spend(
+        private ICoins Spend(
                 int remaining,
                 IEnumerable<int> coins,
                 List<int> spent)
@@ -42,6 +42,7 @@ namespace KnapSack
 
             // Remainign coins
             var i = 0;
+            ICoins currentResult = new NoCoins();
             foreach (var coin in coins)
             {
                 var lessRemaining = remaining - coin;
@@ -52,10 +53,22 @@ namespace KnapSack
 
                 if (result.IsSuccess)
                 {
-                    return result;
+                    if (result.Sum == 0)
+                    {
+                        return result;
+                    }
+
+                    currentResult = SpentCoins.Compare(result, currentResult) >= 0 ?
+                        result :
+                        currentResult;
                 }
 
                 i++;
+            }
+
+            if (currentResult != null)
+            {
+                return currentResult;
             }
 
             // No coins have been left
