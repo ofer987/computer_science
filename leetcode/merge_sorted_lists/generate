@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+Dir.mkdir('input') unless Dir.exists?('input')
+Dir.mkdir('output') unless Dir.exists?('output')
+
+test_case = ARGV[0].to_i
+max = ARGV[1].to_i
+
+input_file = "input/#{test_case}.txt"
+output_file = "output/#{test_case}.txt"
+
+begin
+  File.delete(input_file)
+rescue => ex
+  # Ignore errors
+end
+
+begin
+  File.delete(output_file)
+rescue => ex
+  # Ignore errors
+end
+
+lists = ARGV[2..-1].map do |length|
+  length
+    .to_i
+    .times
+    .map { Random.rand(max) }
+    .sort
+end
+
+questions = lists
+  .map { |list| list.join(" ") }
+  .join("\n")
+
+answer = lists.flatten.sort.join(" ")
+
+begin
+  IO.write(input_file, questions)
+  IO.write(output_file, answer)
+rescue => ex
+  puts "Error!"
+  puts ex
+  puts ex.backtrace
+end
