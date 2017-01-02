@@ -16,27 +16,23 @@ namespace MergeSortedLists
 
         public IEnumerable<int> Merge()
         {
-            var tracker = SortedLists.Select(l => 0).ToList();
+            // The indices start at 0
+            var indexTracker = SortedLists.Select(l => 0).ToList();
 
             // Infinite loop
             while(true)
             {
-                // Exit condition
-                if (ShouldExit(tracker, SortedLists))
-                {
-                    break;
-                }
-
                 // Find the smallest number
                 var chosenList = -1;
-                var min = int.MinValue;
+                var min = int.MaxValue;
                 for (var i = 0; i < SortedLists.Count; i++)
                 {
                     var list = SortedLists[i];
-                    var trackedIndex = tracker[i];
+                    var trackedIndex = indexTracker[i];
 
                     if (trackedIndex >= list.Count)
                     {
+                        // Index is exhausted so do not use it
                         continue;
                     }
 
@@ -48,27 +44,19 @@ namespace MergeSortedLists
                     }
                 }
 
-                yield return min;
-
-                tracker[chosenList]++;
-            }
-        }
-
-        public bool ShouldExit(
-                IList<int> tracker,
-                IEnumerable<IEnumerable<int>> lists)
-        {
-            var i = 0;
-            foreach (var list in lists)
-            {
-                var trackedIndex = tracker[i];
-                if (trackedIndex < tracker.Count)
+                // Exit condition
+                if (chosenList == -1)
                 {
-                    return false;
+                    // No lists were chosen because all the indexTrackers are exhausted:
+                    // i.e., all the indices are greater than the count of the SortedLists
+                    break;
                 }
-            }
 
-            return true;
+                // Increment the indexTracker
+                indexTracker[chosenList]++;
+
+                yield return min;
+            }
         }
     }
 }

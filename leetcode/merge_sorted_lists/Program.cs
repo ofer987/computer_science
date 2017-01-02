@@ -12,7 +12,6 @@ namespace MergeSortedLists
         public static void Main(string[] args)
         {
             var lists = ReadLists().ToList();
-
             var answer = new Lists(lists).Merge().Join(" ");
 
             Console.WriteLine(answer);
@@ -20,12 +19,15 @@ namespace MergeSortedLists
 
         private static IEnumerable<List<int>> ReadLists()
         {
-            var count = int.Parse(Console.ReadLine());
-
-            for (var i = 0; i < count; i++)
+            while (true)
             {
-                yield return Console
-                    .ReadLine()
+                var input = Console.ReadLine();
+                if (input == null)
+                {
+                    break;
+                }
+
+                yield return input
                     .Split(' ')
                     .Select(int.Parse)
                     .ToList();
