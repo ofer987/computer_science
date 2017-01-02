@@ -53,11 +53,6 @@ namespace KnapSack
 
                 if (result.IsSuccess)
                 {
-                    if (result.Sum == 0)
-                    {
-                        return result;
-                    }
-
                     currentResult = SpentCoins.Compare(result, currentResult) >= 0 ?
                         result :
                         currentResult;
@@ -66,13 +61,11 @@ namespace KnapSack
                 i++;
             }
 
-            if (currentResult != null)
-            {
-                return currentResult;
-            }
-
-            // No coins have been left
-            return new SpentCoins(true, spent);
+            // the most amount of coins spent if could not properly spend coins
+            // i.e., sum of spentCoins is greater than (expected) Sum
+            return currentResult.IsSuccess ?
+                currentResult :
+                new SpentCoins(true, spent);
         }
     }
 }

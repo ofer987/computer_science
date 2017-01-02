@@ -48,6 +48,11 @@ namespace KnapSack
             Count = Coins.Count();
         }
 
+        public override string ToString()
+        {
+            return Coins.Join(" ");
+        }
+
         private int GetSum(IEnumerable<int> coins)
         {
             try
