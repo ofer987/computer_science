@@ -18,6 +18,6 @@
   },
 
   "tooling": {
-    "defaultNamespace": "merge_sorted_lists"
+    "defaultNamespace": "MergeSortedLists"
   }
 }
