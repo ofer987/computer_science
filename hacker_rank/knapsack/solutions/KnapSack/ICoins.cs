@@ -9,6 +9,8 @@ namespace KnapSack
 {
     public interface ICoins
     {
+        SpendingTypes Spending { get; }
+
         bool IsSuccess { get; }
 
         IEnumerable<int> Coins { get; }

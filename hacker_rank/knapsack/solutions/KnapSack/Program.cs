@@ -15,7 +15,8 @@ namespace KnapSack
             {
                 var result = testCase.Spend();
 
-                Console.WriteLine($"Expected: {testCase.Sum}, Actual: {result.Sum}: {result}");
+                Console.WriteLine(result.ToString());
+                Console.WriteLine("");
             }
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace KnapSack.Extensions
         {
             var sb = new StringBuilder();
 
-            sb.Append(list.First().ToString());
+            sb.Append(list.FirstOrDefault().ToString());
 
             foreach (var item in list.Skip(1))
             {
@@ -20,5 +21,18 @@ namespace KnapSack.Extensions
 
             return sb.ToString();
         }
+
+        // public static int Int32Sum<T>(this IEnumerable<T> list)
+        // {
+        //     var sum = 0;
+        //
+        //     foreach (T item in list)
+        //     {
+        //         var val = Convert.ToInt32(item);
+        //         sum += val;
+        //     }
+        //
+        //     return sum;
+        // }
     }
 }

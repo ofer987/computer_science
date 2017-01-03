@@ -32,7 +32,16 @@ namespace KnapSack
             return 0;
         }
 
-        public bool IsSuccess { get; private set; }
+        public SpendingTypes Spending { get; private set; }
+
+        public bool IsSuccess
+        {
+            get
+            {
+                return Spending == SpendingTypes.All ||
+                    Spending == SpendingTypes.Almost;
+            }
+        }
 
         public IEnumerable<int> Coins { get; private set; }
 
@@ -40,9 +49,9 @@ namespace KnapSack
 
         public int Count { get; private set; }
 
-        public SpentCoins(bool isSuccess, IEnumerable<int> coins)
+        public SpentCoins(SpendingTypes spending, IEnumerable<int> coins)
         {
-            IsSuccess = isSuccess;
+            Spending = spending;
             Coins = coins;
             Sum = GetSum(coins);
             Count = Coins.Count();
@@ -50,7 +59,7 @@ namespace KnapSack
 
         public override string ToString()
         {
-            return Coins.Join(" ");
+            return Sum.ToString();
         }
 
         private int GetSum(IEnumerable<int> coins)

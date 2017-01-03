@@ -9,13 +9,14 @@ namespace KnapSack
 {
     public class TestCase
     {
-        public int Sum { get; private set; }
+        private List<int> Coins;
+        private Memory Memo = new Memory();
 
-        private List<int> Coins { get; set; }
+        public int Sum { get; private set; }
 
         public TestCase(IList<int> coins, int sum)
         {
-            Coins = coins.OrderByDescending(c => c).ToList();
+            Coins = coins.OrderBy(c => c).ToList();
             Sum = sum;
         }
 
@@ -29,43 +30,71 @@ namespace KnapSack
                 IEnumerable<int> coins,
                 List<int> spent)
         {
+            // var coinsString = spent.Join(" ");
+            // Console.WriteLine("Spent");
+            // Console.WriteLine($"\t{coinsString}");
+
+            var sum = spent.Sum();
+            Memo[sum] = spent;
+
             // Exit conditions
             if (remaining == 0)
             {
-                return new SpentCoins(true, spent);
+                return new SpentCoins(SpendingTypes.All, spent);
             }
 
             if (remaining < 0)
             {
-                return new SpentCoins(false, new List<int>());
+                return new NoCoins();
             }
 
-            // Remainign coins
+            // Has remaining been memoized?
+            // If so then use it!
+            var memoizedSpent = Memo[remaining];
+            if (memoizedSpent != null)
+            {
+                var totalSpent = new List<int>();
+                totalSpent.AddRange(spent);
+                totalSpent.AddRange(memoizedSpent);
+
+                return new SpentCoins(SpendingTypes.All, totalSpent);
+            }
+
+            // Calculate the amount of coins to spend
+            // for remaining
             var i = 0;
-            ICoins currentResult = new NoCoins();
+            ICoins bestResult = new NoCoins();
             foreach (var coin in coins)
             {
+                Console.WriteLine($"Spending {coin}");
                 var lessRemaining = remaining - coin;
                 var moreSpent = new List<int>(spent);
                 moreSpent.Add(coin);
 
                 var result = Spend(lessRemaining, coins.Skip(i), moreSpent);
 
-                if (result.IsSuccess)
+                if (result.Spending == SpendingTypes.All)
                 {
-                    currentResult = SpentCoins.Compare(result, currentResult) >= 0 ?
-                        result :
-                        currentResult;
+                    bestResult = result;
+                    break;
+                }
+                else if (result.Spending == SpendingTypes.Almost)
+                {
+                    bestResult = result;
                 }
 
                 i++;
             }
 
+            // var coinsString = bestResult.Coins.Join(" ");
+            // Console.WriteLine("Memoizing");
+            // Console.WriteLine($"\t{bestResult.Sum}: {coinsString}");
+
             // the most amount of coins spent if could not properly spend coins
             // i.e., sum of spentCoins is greater than (expected) Sum
-            return currentResult.IsSuccess ?
-                currentResult :
-                new SpentCoins(true, spent);
+            return bestResult.IsSuccess ?
+                bestResult :
+                new SpentCoins(SpendingTypes.Almost, spent);
         }
     }
 }
