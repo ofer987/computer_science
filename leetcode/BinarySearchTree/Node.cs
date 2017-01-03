@@ -1,9 +1,16 @@
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System;
+
+using BinarySearchTree.Null;
+
 namespace BinarySearchTree
 {
-    public class Node : INode
+    public class Node : INode, IDisposable
     {
         private Tree Tree;
-        private int Index;
+        private int TreeIndex;
 
         public int Number { get; private set; }
 
@@ -24,7 +31,7 @@ namespace BinarySearchTree
         public Node(Tree tree, int index, int number, INode left, INode right)
         {
             Tree = tree;
-            Index = index;
+            TreeIndex = index;
             Number = number;
             Left = left;
             Right = right
@@ -47,7 +54,7 @@ namespace BinarySearchTree
             if (Number == number)
             {
                 Rotate();
-                Remove();
+                Dispose();
 
                 return true;
             }
@@ -83,7 +90,12 @@ namespace BinarySearchTree
                 Right.Rotate(number);
         }
 
-        private bool Remove()
+        public override string ToString()
+        {
+            return Number.ToString();
+        }
+
+        private override void Dispose()
         {
             if (isLeaf)
             {
@@ -91,13 +103,17 @@ namespace BinarySearchTree
                 if (Index % 2 == 0)
                 {
                     parent.Right = new Null.Node();
-                } 
-                else 
+                }
+                else
                 {
                     parent.Left == new Null.Node();
                 }
 
-                Tree[parent.
+                // Remove from the tree
+                // So that all reference to `this` are removed
+                // And therefore this object can be collected
+                // by the Garbage Collector
+                Tree[OriginalIndex] = null;
 
                 return true;
             }

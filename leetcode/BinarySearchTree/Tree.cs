@@ -1,3 +1,10 @@
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System;
+
+using BinarySearchTree.Null;
+
 namespace BinarySearchTree
 {
     public class Tree
@@ -18,6 +25,53 @@ namespace BinarySearchTree
         public INode Search(int number)
         {
             return Root.Search(number);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            var action = (node) =>
+            {
+                sb.Append($"{node.ToString()} ");
+            }
+
+            BreadthFirstSearch(action);
+
+            return sb.ToString();
+        }
+
+        public void BreadthFirstSearch(Action<Inode> action)
+        {
+            var level = new Queue<INode>();
+            level.Enqueue(Root);
+
+            while (true)
+            {
+                var nextLevel = new Queue<INode>();
+
+                if (level.All(node => node.IsIsEmpty))
+                {
+                    break;
+                }
+
+                foreach (var node in level)
+                {
+                    action(node);
+                    sb.Append($"{node.ToString()} ")
+
+                    nextLevel.Enqueue(node.Left);
+                    nextLevel.Enqueue(node.Right);
+                }
+
+                if (level.Empty)
+                {
+                    sb.AppendLine();
+                    level = nextLevel;
+                }
+            }
+
+            return sb.ToString();
         }
 
         private IList<INode> GetNodes(IEnumerable<int?> numbers)

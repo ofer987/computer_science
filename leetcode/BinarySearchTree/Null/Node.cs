@@ -25,5 +25,10 @@ namespace BinarySearchTree.Null
         {
             return false;
         }
+
+        public override string ToString()
+        {
+            return "Empty";
+        }
     }
 }
