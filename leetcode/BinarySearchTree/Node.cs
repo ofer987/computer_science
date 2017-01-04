@@ -111,6 +111,9 @@ namespace BinarySearchTree
                 if (Left.IsEmpty)
                 {
                     Left = new Node(Tree, number);
+                    Left.Parent = this;
+                    Tree.Add(Left);
+
                     return true;
                 }
 
@@ -121,6 +124,9 @@ namespace BinarySearchTree
                 if (Right.IsEmpty)
                 {
                     Right = new Node(Tree, number);
+                    Right.Parent = this;
+                    Tree.Add(Right);
+
                     return true;
                 }
 
