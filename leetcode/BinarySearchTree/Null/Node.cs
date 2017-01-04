@@ -26,6 +26,11 @@ namespace BinarySearchTree.Null
             return false;
         }
 
+        public bool Insert(int number)
+        {
+            return false;
+        }
+
         public override string ToString()
         {
             return "Empty";

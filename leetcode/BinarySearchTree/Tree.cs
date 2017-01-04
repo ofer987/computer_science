@@ -27,6 +27,11 @@ namespace BinarySearchTree
             return Root.Search(number);
         }
 
+        public bool Insert(int number)
+        {
+            return Root.Insert(number);
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();

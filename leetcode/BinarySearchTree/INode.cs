@@ -13,6 +13,8 @@ namespace BinarySearchTree
 
         INode Search(int number);
 
+        bool Insert(int number);
+
         bool Delete(int number);
 
         bool Rotate();

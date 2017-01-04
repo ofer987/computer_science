@@ -37,6 +37,15 @@ namespace BinarySearchTree
             Right = right
         }
 
+        public Node(Tree tree, int number)
+        {
+            Tree = tree;
+            TreeIndex = tree.Count;
+            Number = number;
+            Left = new Null.Node();
+            Right = new Null.Node();
+        }
+
         public INode Search(int number)
         {
             if (Number == number)
@@ -88,6 +97,35 @@ namespace BinarySearchTree
             return number < Number ?
                 Left.Rotate(number) :
                 Right.Rotate(number);
+        }
+
+        public bool Insert(int number)
+        {
+            if (number == Number)
+            {
+                return false;
+            }
+
+            if (number < Number)
+            {
+                if (Left.IsEmpty)
+                {
+                    Left = new Node(Tree, number);
+                    return true;
+                }
+
+                return Left.Insert();
+            }
+            else
+            {
+                if (Right.IsEmpty)
+                {
+                    Right = new Node(Tree, number);
+                    return true;
+                }
+
+                return Right.Insert();
+            }
         }
 
         public override string ToString()
