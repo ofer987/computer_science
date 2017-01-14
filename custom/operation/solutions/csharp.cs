@@ -5,13 +5,13 @@ using System.Linq;
 public enum Symbols
 {
     None = 0,
-    Add,
-    Subtract,
+    Addition,
+    Subtraction,
     Multiplication,
     Division
 }
 
-public class SymbolComparer : Comparer<Symbol>
+public class Precendence : Comparer<Symbol>
 {
     public Symbols Symbol { get; private set; }
 
@@ -22,9 +22,9 @@ public class SymbolComparer : Comparer<Symbol>
 
     public override int Compare(Symbol x, Symbol y)
     {
-        if (x == Symbol.Add || x == Symbol.Subtract)
+        if (x == Symbol.Addition || x == Symbol.Subtraction)
         {
-            if (y == Symbol.Add || y == Symbol.Subtract)
+            if (y == Symbol.Addition || y == Symbol.Subtraction)
             {
                 return 0;
             }
@@ -35,7 +35,7 @@ public class SymbolComparer : Comparer<Symbol>
         }
         else
         {
-            if (y == Symbol.Add || y == Symbol.Subtract)
+            if (y == Symbol.Addition || y == Symbol.Subtraction)
             {
                 return -1;
             }
@@ -119,9 +119,9 @@ public class Operator : Node
     {
         switch (Symbol)
         {
-            case Symbols.Add:
+            case Symbols.Addition:
                 return "+";
-            case Symbols.Subtract:
+            case Symbols.Subtraction:
                 return "-";
             case Symbols.Multiplication:
                 return "*";
@@ -136,9 +136,9 @@ public class Operator : Node
     {
         switch (Symbol)
         {
-            case Symbols.Add:
+            case Symbols.Addition:
                 return Left.Result() + Right.Result();
-            case Symbols.Subtract:
+            case Symbols.Subtraction:
                 return Left.Result() - Right.Result();
             case Symbols.Multiplication:
                 return Left.Result() * Right.Result();
@@ -180,11 +180,11 @@ public class Operation
             Node node = null;
             if (val == "+")
             {
-                node = new Operator(Symbols.Add);
+                node = new Operator(Symbols.Addition);
             }
             else if (val == "-")
             {
-                node = new Operator(Symbols.Subtract);
+                node = new Operator(Symbols.Subtraction);
             }
             else if (val == "*")
             {
@@ -210,7 +210,7 @@ public class Operation
                 oper.Left = left;
                 oper.Right = right;
 
-                if (new SymbolComparer.Compare(oper.Symbol, previousSymbol == 1))
+                if (new Precendence.Compare(oper.Symbol, previousSymbol == 1))
                 {
                     oper.Left = left;
                     oper.Right = right;
