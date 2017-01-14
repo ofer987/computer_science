@@ -1,24 +1,50 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 public enum Symbols
 {
-    Add = 0;
-    Subtract;
-    Multiplication;
+    Add = 0,
+    Subtract,
+    Multiplication,
     Division
 }
 
 public abstract class Node
 {
+    public virtual Node Left { get; set; }
+
+    public virtual Node Right { get; set; }
+
+    public abstract int Result();
+
     public abstract string Value();
 
-    public string ToString()
+    public override string ToString()
     {
-        return $"{Left Right Value}"
+        return $"{Left} {Right} {Value()}";
     }
 }
 
 // Leaf
 public class Operand : Node
 {
+    public override Node Left
+    {
+        get
+        {
+            throw new Exception("Operands do not have any any children");
+        }
+    }
+
+    public override Node Right
+    {
+        get
+        {
+            throw new Exception("Operands do not have any any children");
+        }
+    }
+
     public int Digits { get; private set; }
 
     public Operand(int digits)
@@ -31,7 +57,7 @@ public class Operand : Node
         return Digits.ToString();
     }
 
-    public int Result()
+    public override int Result()
     {
         return Digits;
     }
@@ -41,15 +67,9 @@ public class Operator : Node
 {
     public Symbols Symbol { get; private set; }
 
-    public Node Left { get; private set; }
-
-    public Node Right { get; private set; }
-
-    public Operator(Symbols symbol, Node left, Node right)
+    public Operator(Symbols symbol)
     {
         Symbol = symbol;
-        Left = left;
-        Right = right;
     }
 
     public override string Value()
@@ -63,13 +83,13 @@ public class Operator : Node
             case Symbols.Multiplication:
                 return "*";
             case Symbols.Division:
-                return "/"
+                return "/";
             default:
                 throw new Exception($"Undefined symbol {Symbol}");
         }
     }
 
-    public int Result()
+    public override int Result()
     {
         switch (Symbol)
         {
@@ -105,29 +125,47 @@ public class Operation
     {
         var values = str.Split(' ');
 
+        var queue = new Queue<Node>();
         foreach (string val in values)
         {
+            Node node = null;
             if (val == "+")
             {
-                new Operator(Symbols.Add);
+                node = new Operator(Symbols.Add);
             }
             else if (val == "+")
             {
-                new Operator(Symbols.Subtract);
+                node = new Operator(Symbols.Subtract);
             }
             else if (val == "+")
             {
-                new Operator(Symbols.Multiplication);
+                node = new Operator(Symbols.Multiplication);
             }
             else if (val == "+")
             {
-                new Operator(Symbols.Division);
+                node = new Operator(Symbols.Division);
             }
             else
             {
-                new Operand(int.Parse(val));
+                node = new Operand(int.Parse(val));
+            }
+
+            queue.Enqueue(node);
+
+            if (queue.Count == 3)
+            {
+                var left = queue.Dequeue();
+                var oper = queue.Dequeue();
+                var right = queue.Dequeue();
+
+                oper.Left = left;
+                oper.Right = right;
+
+                queue.Enqueue(oper);
             }
         }
+
+        return queue.Dequeue();
     }
 }
 
@@ -135,7 +173,13 @@ public class Solution
 {
     public static void Main(string[] argv)
     {
-        operations
+        foreach (var operationString in ReadOperations())
+        {
+            var operation = new Operation(operationString);
+
+            Console.WriteLine(operation.ToString());
+            Console.WriteLine(operation.Result());
+        }
     }
 
     private static IEnumerable<string> ReadOperations()
