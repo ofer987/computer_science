@@ -4,10 +4,48 @@ using System.Linq;
 
 public enum Symbols
 {
-    Add = 0,
+    None = 0,
+    Add,
     Subtract,
     Multiplication,
     Division
+}
+
+public class SymbolComparer : Comparer<Symbol>
+{
+    public Symbols Symbol { get; private set; }
+
+    public OperatorSymbol(Symbols symbol)
+    {
+        Symbol = symbol;
+    }
+
+    public override int Compare(Symbol x, Symbol y)
+    {
+        if (x == Symbol.Add || x == Symbol.Subtract)
+        {
+            if (y == Symbol.Add || y == Symbol.Subtract)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            if (y == Symbol.Add || y == Symbol.Subtract)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+
 }
 
 public abstract class Node
@@ -135,8 +173,9 @@ public class Operation
     {
         var values = str.Split(' ');
 
+        var previousSymbol = Symbols.None;
         var queue = new Queue<Node>();
-        foreach (string val in values)
+        foreach (var val in values)
         {
             Node node = null;
             if (val == "+")
@@ -171,7 +210,17 @@ public class Operation
                 oper.Left = left;
                 oper.Right = right;
 
-                queue.Enqueue(oper);
+                if (new SymbolComparer.Compare(oper.Symbol, previousSymbol == 1))
+                {
+                    oper.Left = left;
+                    oper.Right = right;
+                }
+                else
+                {
+                    queue.Enqueue(oper);
+                }
+
+                var previousSymbol = oper.Symbol;
             }
         }
 
