@@ -22,7 +22,7 @@ public abstract class Node
 
     public override string ToString()
     {
-        return $"{Left} {Right} {Value()}";
+        return $"{Left.ToString()} {Right.ToString()} {Value()}";
     }
 }
 
@@ -60,6 +60,11 @@ public class Operand : Node
     public override int Result()
     {
         return Digits;
+    }
+
+    public override string ToString()
+    {
+        return Value();
     }
 }
 
@@ -121,6 +126,11 @@ public class Operation
         return Root.Result();
     }
 
+    public override string ToString()
+    {
+        return Root.ToString();
+    }
+
     private Node Parse(string str)
     {
         var values = str.Split(' ');
@@ -133,15 +143,15 @@ public class Operation
             {
                 node = new Operator(Symbols.Add);
             }
-            else if (val == "+")
+            else if (val == "-")
             {
                 node = new Operator(Symbols.Subtract);
             }
-            else if (val == "+")
+            else if (val == "*")
             {
                 node = new Operator(Symbols.Multiplication);
             }
-            else if (val == "+")
+            else if (val == "/")
             {
                 node = new Operator(Symbols.Division);
             }
