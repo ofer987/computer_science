@@ -11,7 +11,7 @@ class Memoization
     @tails = {}
   end
 
-  def has_key?(key)
+  def key?(key)
     @tails.has_key?(key)
   end
 end
@@ -103,54 +103,70 @@ end
 class Node
   attr_reader :used_coin, :tails
 
-  def initialize(coins, value, used_coins, memo)
-    # sort in descending order
-    @coins = Array(coins).sort { |x, y| y <=> x }
-    @value = value
-    @used_coins = Array(used_coins)
-    @memo = memo
-
-    @used_coin = @used_coins.last
-
-    @children = []
-
-    @used = false
+  def initialize(value, coins, used_coins, memo)
+    self.coins = Array(coins)
+      .map(&:to_i)
+      .sort { |first, second| second <=> first }
+    self.used_coins = Array(used_coins)
+      .map(&:to_i)
+      .sort { |first, second| second <=> first }
+    self.value = value
+    self.memo = memo
   end
 
-  def use_coins
-    if @used
-      return
-    end
-    @used = true
+  def children
+    @children ||=
+      begin
+        memo.fetch(remaining_value)
+      rescue KeyNotFoundError
+        available_coins.map do |coin|
+          Node.new(value, coins, used_coins + coin, memo)
+        end
+      end
+  end
+  #     new_value = value - coin
+  #     used_coins = @used_coins + Array(coin)
+  #     child = if @used_coins.any? && @used_coins.last < coin
+  #               [DeadEnd.new, nil]
+  #             elsif @memo.tails.key?(new_value)
+  #               [@memo.tails[new_value], coin]
+  #             elsif new_value > 0
+  #               [Node.new(@coins, new_value, used_coins, @memo), coin]
+  #             elsif new_value == 0
+  #               [Leaf.new(used_coins), coin]
+  #             else
+  #               [DeadEnd.new, nil]
+  #             end
+  #
+  #     child[0].use_coins
+  #
+  #     child
+  #   end
+  #
+  #   tails
+  #
+  #   @memo.tails[@value] = self
+  #   combinations.each do |combination|
+  #     @memo.combinations << combination
+  #   end
+  # end
 
-    puts "calculating for #{@used_coin}"
+  def use
+    coin_sets = memo.fetch(used_value, Set.new)
 
-    @children = @coins.map do |coin|
-      new_value = @value - coin
-      used_coins = @used_coins + Array(coin)
-      child = if @used_coins.any? && @used_coins.last < coin
-                [DeadEnd.new, nil]
-              elsif @memo.tails.has_key?(new_value)
-                [@memo.tails[new_value], coin]
-              elsif new_value > 0
-                [Node.new(@coins, new_value, used_coins, @memo), coin]
-              elsif new_value == 0
-                [Leaf.new(used_coins), coin]
-              else
-                [DeadEnd.new, nil]
-              end
+    memo[used_value] = coin_sets + used_coins
+  end
 
-      child[0].use_coins
+  def used_value
+    @used_value ||= used_coins.each_with_object(0) { |coin, total| total += coin }
+  end
 
-      child
-    end
+  def coin
+    @coin ||= used_coins.last
+  end
 
-    tails
-
-    @memo.tails[@value] = self
-    combinations.each do |combination|
-      @memo.combinations << combination
-    end
+  def remaining_value
+    @remaining_value ||= value - used_value
   end
 
   def combinations
@@ -166,15 +182,26 @@ class Node
 
     @tails = Combinations.concat(_tails)
   end
+
+  def available_coins
+    @available_coins ||=
+      begin
+        return [] if remaining_value < 0
+
+        coins.select { |c| c <= coin }
+      end
+  end
+
+  private
+
+  attr_accessor :used_coins, :coins, :value, :memo
 end
 
-n, _m = gets.strip.split(' ').map(&:to_i)
+remaining_value = gets.strip.split(' ').first.to_i
 coins = gets.strip.split(' ').map(&:to_i)
 
-# n = 4
-# coins = [1, 2, 3]
 memo = Memoization.new
-counter = Node.new(coins, n, [], memo)
+counter = Node.new(coins, remaining_value, [], memo)
 counter.use_coins
 
 puts memo.combinations.count
