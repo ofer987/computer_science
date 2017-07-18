@@ -3,6 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+public static class EnumerableExtensions
+{
+    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> operation)
+    {
+        foreach (var item in enumerable)
+        {
+            operation(item);
+        }
+    }
+}
+
 public static class StringExtensions
 {
     public static IEnumerable<string> Substrings(this string str)
@@ -17,7 +28,7 @@ public static class StringExtensions
     }
 }
 
-public class Contacts : Dictionary<string, bool>
+public class Contacts : Dictionary<string, int>
 {
     Dictionary<string, int> Partials { get; }
 
@@ -28,10 +39,9 @@ public class Contacts : Dictionary<string, bool>
 
     public void Add(string name)
     {
-        bool exists;
+        int count;
         foreach (var substring in name.Substrings())
         {
-            int count;
             if (Partials.TryGetValue(substring, out count))
             {
                 Partials[substring] = count + 1;
@@ -42,9 +52,13 @@ public class Contacts : Dictionary<string, bool>
             }
         }
 
-        if (!TryGetValue(name, out exists))
+        if (TryGetValue(name, out count))
         {
-            Add(name, true);
+            Add(name, count + 1);
+        }
+        else
+        {
+            Add(name, 1);
         }
     }
 
@@ -67,13 +81,9 @@ public class Solution
     public static void Main(String[] args)
     {
         var contacts = new Contacts();
-        foreach (var line in ReadLines())
-        {
-            foreach (var answer in Operation(line, contacts))
-            {
-                Console.WriteLine(answer.ToString());
-            }
-        }
+        ReadLines().
+            SelectMany(line => Operation(line, contacts)).
+            ForEach(answer => Console.WriteLine(answer));
     }
 
     private static IEnumerable<string> ReadLines()
@@ -90,6 +100,7 @@ public class Solution
 
     private static IEnumerable<int> Operation(string line, Contacts contacts)
     {
+        // Assume that contact does not containt whitespace!
         var list = line.Split(' ').ToList();
         var oper = list[0];
         var operand = list[1];
