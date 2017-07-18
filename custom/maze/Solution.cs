@@ -6,20 +6,33 @@ public class Maze : List<List<bool>>
 {
     public List<Node> FirstPath(Tuple<int, int> start, Tuple<int, int> end)
     {
-        var traversed = new Dictionary<Node, bool>();
-        var node = new Node(this, start.Item1, start.Item2, traversed);
-
         if (!this[start.Item2][start.Item1] || !this[end.Item2][end.Item1])
         {
             return null;
         }
 
-        return Next(Enumerable.Empty<Node>(), node, end);
+        var traversed = new Dictionary<Node, bool>();
+        var node = new Node(this, start.Item1, start.Item2, traversed);
+
+        return Dfs(Enumerable.Empty<Node>(), node, end);
     }
 
-    private List<Node> Next(IEnumerable<Node> path, Node parent, Tuple<int, int> end)
+    public List<Node> ShortestPath(Tuple<int, int> start, Tuple<int, int> end)
     {
-        if (parent.X == end.Item1 && parent.Y == end.Item2)
+        if (!this[start.Item2][start.Item1] || !this[end.Item2][end.Item1])
+        {
+            return null;
+        }
+
+        var traversed = new Dictionary<Node, bool>();
+        var node = new Node<this, start.Item1, start.Item2, traversed);
+
+        return Bfs(node, end);
+    }
+
+    private List<Node> Dfs(IEnumerable<Node> path, Node parent, Tuple<int, int> end)
+    {
+        if (IsEnd(parent, end))
         {
             return path as List<Node>() ?? path.ToList();
         }
@@ -34,6 +47,42 @@ public class Maze : List<List<bool>>
 
         // Path does not exist
         return null;
+    }
+
+    private List<Node> Bfs(Node firstNode, Tuple<int, int> end)
+    {
+        var pathList = new List<Node> { firstNode };
+        var queue = new Queue<List<Node>> { pathList };
+        var nextQueue = new Queue<Node>();
+
+        while (queue.Count > 0)
+        {
+            var currentPath = queue.Dequeue();
+
+            if (IsEnd(currentPath.Last(), end))
+            {
+                return currentPath;
+            }
+
+            foreach (var child in next.Children)
+            {
+                currentPath.Add(child);
+                nextQueue.Enqueue(currentPath);
+            }
+
+            if (queue.Count == 0)
+            {
+                queue = nextQueue;
+                nextQueue = new Queue<Node>();
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsEnd(Node node, Tuple<int, int> end)
+    {
+        return node.X == end.Item1 && node.Y == end.Item2;
     }
 }
 
