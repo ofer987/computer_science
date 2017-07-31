@@ -8,7 +8,7 @@ class Solution
 {
     public class Grid
     {
-        private int? Bits;
+        private BitArray Bits;
 
         public int Rows { get; private set; }
 
@@ -21,26 +21,27 @@ class Solution
             Columns = columns;
         }
 
-        public int ToBits()
+        public BitArray ToBits()
         {
-            if (Bits.HasValue)
+            if (Bits != null)
             {
-                return Bits.Value;
+                return Bits;
             }
 
             var length = Rows * Columns;
+            var maxValue = (int)(Math.Pow((double)2, (double)length) - 1);
 
-            Bits = (int)(Math.Pow((double)2, (double)length) - 1);
-            return Bits.Value;
+            Bits = new BitArray(new int[] { maxValue });
+            return Bits;
         }
 
-        public int FreeCellsValue(IEnumerable<Track> tracks)
+        public BitArray FreeCells(IEnumerable<Track> tracks)
         {
             var maxValue = ToBits();
-            var result = maxValue;
+            var result = new BitArray(maxValue);
             foreach (var track in tracks)
             {
-                result &= track.ToBits(maxValue, Columns);
+                result.And(track.ToBits(maxValue, Columns));
             }
 
             return result;
@@ -63,16 +64,16 @@ class Solution
             End = end - 1;
         }
 
-        public int ToBits(int maxValue, int columnsPerRow)
+        public BitArray ToBits(BitArray maxValue, int columnsPerRow)
         {
-            var result = maxValue;
+            var bits = new BitArray(maxValue);
             for (var i = Start; i <= End; i++)
             {
                 var index = columnsPerRow * Row + i;
-                result -= (int)Math.Pow((double)2, (double)index);
+                bits.Set(index, false);
             }
 
-            return (int)result;
+            return bits;
         }
     }
 
@@ -81,7 +82,8 @@ class Solution
         var grid = ReadGrid();
         var tracks = ReadTracks();
 
-        var freeCells = ToBits(grid.FreeCellsValue(tracks))
+        var freeCells = grid
+            .FreeCells(tracks)
             .Cast<bool>()
             .Where(bit => bit)
             .Count();
@@ -108,11 +110,6 @@ class Solution
             var list = line.Split(' ').Select(int.Parse).ToList();
             yield return new Track(list[0], list[1], list[2]);
         }
-    }
-
-    private static BitArray ToBits(int val)
-    {
-        return new BitArray(new int[] { val });
     }
 }
 
