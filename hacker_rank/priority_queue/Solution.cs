@@ -49,7 +49,7 @@ public class Student : IComparable<Student>
 
 public class Heap
 {
-    public List<Student> Students { get; }
+    private List<Student> Students;
 
     public class Heap()
     {
@@ -75,22 +75,53 @@ public class Heap
 
         Students.RemoveAt(0);
 
-        if (Students.Count >= 3 && Students[2].CompareTo(Students[0]) >= 0)
+        Shift();
+        Heapify();
+    }
+
+    private void Shift()
+    {
+        if (Students.Count < 2)
         {
-            var temp = Students[0];
-            Students[0] = Students[2];
-            Students[2] = temp;
+            return;
         }
 
-        if (Students.Count >= 2 && Students[1].CompareTo(Students[0]) >= 0 )
-        {
-            var temp = Students[0];
-            Students[0] = Students[1];
-            Students[1] = temp;
-        }
+        Students[0] = Students.Count - 1;
+        Students.RemoveAt(Students.Count - 1);
     }
 
     private void Heapify()
+    {
+        var i = 0;
+        while (i < Students.Count)
+        {
+            var nextIndex = i;
+            var leftIndex = i * 2 + 1;
+            var rightIndex = i * 2 + 2;
+
+            if (Students[i].CompareTo(Students[leftIndex]) >= 0)
+            {
+                var temp = Students[index];
+                Students[index] = Students[leftIndex];
+                Students[leftIndex] = temp;
+
+                nextIndex = leftIndex;
+            }
+
+            if (Students[i].CompareTo(Students[rightIndex]) >= 0)
+            {
+                var temp = Students[index];
+                Students[index] = Students[rightIndex];
+                Students[rightIndex] = temp;
+
+                nextIndex = rightIndex;
+            }
+
+            i = nextIndex;
+        }
+    }
+
+    private void ReverseHeapify()
     {
         var index = Students.Count;
         while (index > 0)
