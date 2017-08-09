@@ -1,0 +1,48 @@
+First Approach:
+
+    enumerate over words
+    for each word,
+        if CreatedAt >= since,
+            Take it
+        else,
+            Ignore
+
+        Place in dictionary, key = word, value = count
+
+    Performance: O(n)
+
+    Sort the keys of the dictionary by the value in descending order.
+    Return the keys.
+
+    Performance: O(nlgn)
+
+Second Approach:
+
+    - Create a doubly linked list which is sorted by descending order and is referenced in the dictionary
+    - Create a dictionary of key = word, value = node in doubly linked list (above)
+
+    enumerate over words
+    for each word,
+        if CreatedAt >= since,
+            Take it
+            if node is new
+                Create node, and place it on the tail
+                left of new tail = current tail
+                    right of current tail = new tail
+            else,
+                Reference the node using the dictionary
+                If current is greater than the left node
+                    - right(left of left of current) = current
+                        - left(current) = left of left of current
+                    - right(current) = left of current
+                        - left(left of current) = current
+                    - right(left of current) = right of current
+                        - left(right of current) = left of current
+                    - if head is the left node then,
+                        head = current
+        else,
+            Ignore
+
+    Return the doubly linked list enumerated from the head to the tail
+
+    Performance: O(n)
