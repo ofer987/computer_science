@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 public static class Int32Extensions
@@ -8,7 +9,7 @@ public static class Int32Extensions
     {
         if (count <= 0)
         {
-            return Enumerable.Empty<int>();
+            yield break;
         }
 
         for (var i = 0; i < count; i++)
@@ -22,12 +23,12 @@ public class Solution
 {
     public static void Main(String[] args)
     {
-        var testCount = ReadTestCount();
+        ReadTestCount();
         var games = ReadGames();
 
-        foreach (var game in games)
+        foreach (var towers in games)
         {
-            var winner = PlayGame(game[0], game[1]);
+            var winner = Winner(towers);
             Console.WriteLine(winner);
         }
     }
@@ -37,36 +38,45 @@ public class Solution
         return int.Parse(Console.ReadLine());
     }
 
-    private static IEnumerable<Tuple<int, int>> ReadGames()
+    private static IEnumerable<List<int>> ReadGames()
     {
-        while ((var line = Console.ReadLine()) != null)
+        string line;
+        while ((line = Console.ReadLine()) != null)
         {
             var conditions = line
                 .Split(' ')
                 .Select(int.Parse)
                 .ToList();
 
-            yield return new Tuple<int, int>(line[0], line[1]);
+            var towers = new List<int>(conditions[0]);
+            for (var i = 0; i < conditions[0]; i++)
+            {
+                towers.Add(conditions[1]);
+            }
+
+            yield return towers;
         }
     }
 
     // Return the winner
-    private static int Winner(IList<int> towers)
+    private static int Winner(List<int> towers)
     {
         var player = 0;
-        while ((var move = Move(towers)) != 0)
+        while (Move(towers) != 0)
+        {
+        }
 
         return (player % 2) + 1;
     }
 
-    private static int Move(IList<int> towers)
+    private static int Move(List<int> towers)
     {
         var move = towers
             .Count
             .ToIndices()
             .Select(index => new Tuple<int, int>(index, LargestDifference(towers[index])))
-            .OrderByDifference(tuple => tuple.Item2)
-            .First;
+            .OrderByDescending(tuple => tuple.Item2)
+            .First();
 
         towers[move.Item1] = towers[move.Item1] - move.Item2;
 
