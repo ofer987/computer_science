@@ -61,12 +61,13 @@ public class Solution
     // Return the winner
     private static int Winner(List<int> towers)
     {
-        var player = 0;
+        var winner = 1;
         while (Move(towers) != 0)
         {
+            winner++;
         }
 
-        return (player % 2) + 1;
+        return (winner % 2) + 1;
     }
 
     private static int Move(List<int> towers)
@@ -78,7 +79,10 @@ public class Solution
             .OrderByDescending(tuple => tuple.Item2)
             .First();
 
-        towers[move.Item1] = towers[move.Item1] - move.Item2;
+        if (move.Item2 > 0)
+        {
+            towers[move.Item1] = move.Item2;
+        }
 
         return move.Item2;
     }
@@ -88,7 +92,7 @@ public class Solution
     {
         for (var i = 1; i < tower; i++)
         {
-            if (i % tower == 0)
+            if (tower % i == 0)
             {
                 return i;
             }
