@@ -1,0 +1,8 @@
+For a given integer, greater than 0, print all the permutations of strings that contain the brackets.
+
+For examplem, given the integer 3, the following brackets will be printed:
+
+() () ()
+() (())
+(()) ()
+((()))
