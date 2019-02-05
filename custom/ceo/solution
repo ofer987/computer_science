@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+def get_employees
+  (85..95).map do |z|
+    y = 2 * z - 168
+    x = 119 - y - z
+
+    [x, y, z]
+  end
+end
+
+puts get_employees
+  .map { |employees| "x = #{employees[0]}, y = #{employees[1]}, z = #{employees[2]}" }
+  .join("\n")
