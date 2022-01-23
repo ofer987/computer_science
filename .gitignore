@@ -54,3 +54,10 @@ build-iPhoneSimulator/
 
 interviews/**/*
 .byebug_history
+
+# Ignore dotnet core build
+**/bin/
+**/obj/
+
+# Ignore Visual Studio Code
+.vscode
