@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+num=18;
+# dotnet run < "./testcases/input/input${num}.txt"
+
+diff --ignore-all-space \
+  <(dotnet run < "./testcases/input/input${num}.txt") \
+  "./testcases/output/output${num}.txt";
