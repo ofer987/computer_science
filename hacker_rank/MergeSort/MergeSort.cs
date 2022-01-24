@@ -44,11 +44,11 @@ public class MergeSort
                 break;
             case 1:
                 firstSubset = values
-                    .Take(values.Length + 1 / 2)
+                    .Take((values.Length + 1) / 2)
                     .ToArray();
 
                 secondSubset = values
-                    .Skip((values.Length + 1 / 2) - 1)
+                    .Skip((values.Length + 1) / 2)
                     .ToArray();
                 break;
             default:

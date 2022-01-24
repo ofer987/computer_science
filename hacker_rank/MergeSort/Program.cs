@@ -2,16 +2,22 @@
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
         Console.WriteLine("Hello, World!");
 
-        var case1 = new int[] { 4, 100, 6, 1, 2, 5, 3, 10, 8 };
-        var expected1 = new int[] { 1, 2, 3, 4, 5, 6, 8, 10, 100 };
+        var case1 = new int[] { 4, 100, 6, 1, 21, 2, 5, 3, 10, 8, -20 };
+        var expected1 = new int[] { -20, 1, 2, 3, 4, 5, 6, 8, 10, 21, 100 };
 
         var actual = MergeSort.Sort(case1);
 
-        Console.WriteLine($"actual has {actual.Length} values");
+        var result = 0;
+
+        if (case1.Length != actual.Length)
+        {
+            return 1;
+        }
+
         for (var i = 0; i < case1.Length; i += 1)
         {
             var actualItem = actual[i];
@@ -23,8 +29,11 @@ public class Program
             }
             else
             {
+                result = 1;
                 Console.WriteLine($"{actualItem} != {expectedItem}");
             }
         }
+
+        return result;
     }
 }
