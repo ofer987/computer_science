@@ -6,8 +6,8 @@ public class Program
     {
         Console.WriteLine("Hello, World!");
 
-        var case1 = new int[] { 4, 6, 1, 2, 5, 3, 10, 8 };
-        var expected1 = new int[] { 1, 2, 3, 4, 5, 6, 8, 10 };
+        var case1 = new int[] { 4, 100, 6, 1, 2, 5, 3, 10, 8 };
+        var expected1 = new int[] { 1, 2, 3, 4, 5, 6, 8, 10, 100 };
 
         var actual = MergeSort.Sort(case1);
 
