@@ -98,92 +98,76 @@ public class MergeSort
         var i = 0;
         var j = 0;
 
-        var finishedIteratingFirstVals = false;
-        var finishedIteratingSecondVals = false;
-        while (!finishedIteratingFirstVals || !finishedIteratingSecondVals)
+        while (i < sortedFirstVals.Length && j < sortedSecondVals.Length)
         {
             var firstVal = sortedFirstVals[i];
             var secondVal = sortedSecondVals[j];
 
-            if (finishedIteratingFirstVals)
-            {
-                results.Add(secondVal);
-                if (j < sortedSecondVals.Length - 1)
-                {
-                    j += 1;
-                }
-                else if (j == sortedSecondVals.Length - 1)
-                {
-                    finishedIteratingSecondVals = true;
-                }
-
-                continue;
-            }
-
-            if (finishedIteratingSecondVals)
+            if (firstVal < secondVal)
             {
                 results.Add(firstVal);
-                if (i < sortedFirstVals.Length - 1)
-                {
-                    i += 1;
-                }
-                else if (i == sortedFirstVals.Length - 1)
-                {
-                    finishedIteratingFirstVals = true;
-                }
-
-                continue;
-            }
-
-            // foreach (var firstVal in firstVals)
-            // TODO convert to while loop
-            // for (; i < sortedFirstVals.Length;)
-            // {
-            //     var firstVal = sortedFirstVals[i];
-            //     // foreach (var secondVal in secondVals)
-            //     // TODO convert to while loop
-            // }
-
-            // for (; j < sortedSecondVals.Length;)
-            // {
-            //     var secondVal = sortedSecondVals[j];
-            // }
-            if (firstVal <= secondVal)
-            {
-                Console.WriteLine($"\t{firstVal}");
-                results.Add(firstVal);
-                if (i < sortedFirstVals.Length - 1)
-                {
-                    i += 1;
-                }
-                else if (i == sortedFirstVals.Length - 1)
-                {
-                    finishedIteratingFirstVals = true;
-                }
+                i += 1;
             }
             else
             {
-                Console.WriteLine($"\t{secondVal}");
                 results.Add(secondVal);
-                if (secondVal == 2)
-                {
-                    Console.WriteLine($"i: {i}, j: {j}");
-                    foreach (var item in results)
-                    {
-                        Console.WriteLine($"\t\t\t{item}");
-                    }
-                    Console.ReadLine();
-                }
-                if (j < sortedSecondVals.Length - 1)
-                {
-                    j += 1;
-                }
-                else if (j == sortedFirstVals.Length - 1)
-                {
-                    finishedIteratingSecondVals = true;
-                }
+                j += 1;
             }
         }
+
+        while (i < sortedFirstVals.Length)
+        {
+            results.Add(sortedFirstVals[i]);
+
+            i += 1;
+        }
+
+        while (j < sortedSecondVals.Length)
+        {
+            results.Add(sortedSecondVals[j]);
+
+            j += 1;
+        }
+
+        // var finishedIteratingFirstVals = false;
+        // var finishedIteratingSecondVals = false;
+        // while (!finishedIteratingFirstVals || !finishedIteratingSecondVals)
+        // {
+        //     var firstVal = sortedFirstVals[i];
+        //     var secondVal = sortedSecondVals[j];
+        //
+        //     // TODO bug
+        //
+        //     // if (firstVal <= secondVal)
+        //     if (finishedIteratingSecondVals || firstVal <= secondVal)
+        //     {
+        //         Console.WriteLine($"\t{firstVal}");
+        //         results.Add(firstVal);
+        //         if (i < sortedFirstVals.Length - 1)
+        //         {
+        //             i += 1;
+        //         }
+        //     }
+        //     // else if (finishedIteratingFirstVals || firstVal > secondVal)
+        //     else
+        //     {
+        //         Console.WriteLine($"\t{secondVal}");
+        //         results.Add(secondVal);
+        //         if (j < sortedSecondVals.Length - 1)
+        //         {
+        //             j += 1;
+        //         }
+        //     }
+        //
+        //     if (i == sortedFirstVals.Length - 1)
+        //     {
+        //         finishedIteratingFirstVals = true;
+        //     }
+        //     if (j == sortedFirstVals.Length - 1)
+        //     {
+        //         finishedIteratingSecondVals = true;
+        //     }
+        // }
 
         return results;
     }
